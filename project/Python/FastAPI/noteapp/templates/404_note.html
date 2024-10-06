@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}404 Note not found{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <h1 class="title">Rosetta note - FastAPI (Python)</h1>
+    <h2 class="title is-4">Sorry, couldn't find a note with the id {{ note_id }}</h2>
+  </div>
+</section>
+{% endblock %}
