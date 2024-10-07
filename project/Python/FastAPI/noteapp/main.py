@@ -37,11 +37,18 @@ def read_notes(
     )
 
 
+@app.post("/notes", response_class=HTMLResponse)
+def create_notes(request: Request, db: Session = Depends(get_db)):
+    notes_db = crud.create_user_note(db)
+    return templates.TemplateResponse(
+        request=request, name="notes.html", context={"notes": notes_db}
+    )
+
+
 @app.get("/notes/{note_id}", response_class=HTMLResponse)
-def read_notes(request: Request, note_id: int):
-    try:
-        note_info = notes_db[note_id - 1]
-    except IndexError:
+def read_notes(request: Request, db: Session = Depends(get_db), note_id: int = 0):
+    note_info = crud.get_note(db, note_id)
+    if note_info is None:
         return templates.TemplateResponse(
             request=request,
             status_code=404,
@@ -51,6 +58,3 @@ def read_notes(request: Request, note_id: int):
     return templates.TemplateResponse(
         request=request, name="note.html", context={"note": note_info}
     )
-
-
-# TODO: Create, update and delete operations over the notes.

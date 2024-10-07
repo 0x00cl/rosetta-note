@@ -28,6 +28,10 @@ def get_notes(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Note).offset(skip).limit(limit).all()
 
 
+def get_note(db: Session, note_id: int):
+    return db.query(models.Note).filter(models.Note.id == note_id).first()
+
+
 def create_user_note(db: Session, note, user_id: int):
     db_note = models.Note(**note.dict(), owner_id=user_id)
     db.add(db_note)
