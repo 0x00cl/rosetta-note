@@ -31,6 +31,11 @@ def get_notes(db: Session, skip: int = 0, limit: int = 100):
 def get_note(db: Session, note_id: int):
     return db.query(models.Note).filter(models.Note.id == note_id).first()
 
+def delete_note(db: Session, note_id: int):
+    note_delete = db.query(models.Note).filter(models.Note.id == note_id).first()
+    db.delete(note_delete)
+    db.commit()
+    return note_delete
 
 def create_user_note(db: Session, note: schemas.NoteCreate, user_id: int):
     db_note = models.Note(**note.dict(), owner_id=user_id)
