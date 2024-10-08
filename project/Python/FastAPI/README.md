@@ -6,4 +6,4 @@
 
 ## Usage
 
-- Running dev environment: ``
+- Running dev environment: `uv run fastapi dev noteapp/main.py`
