@@ -1,9 +1,11 @@
-from fastapi import FastAPI, Request, Depends
+from typing import Annotated
+
+from fastapi import FastAPI, Request, Depends, Form
 from sqlalchemy.orm import Session
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from . import crud, models
+from . import crud, models, schemas
 from .database import SessionLocal, engine
 
 models.Base.metadata.create_all(bind=engine)
@@ -36,10 +38,19 @@ def read_notes(
         request=request, name="notes.html", context={"notes": notes_db}
     )
 
+@app.get("/notes/create", response_class=HTMLResponse)
+def read_notes(
+    request: Request
+):
+    return templates.TemplateResponse(
+        request=request, name="notes_create.html", context={}
+    )
+
 
 @app.post("/notes", response_class=HTMLResponse)
-def create_notes(request: Request, db: Session = Depends(get_db)):
-    notes_db = crud.create_user_note(db)
+def create_notes(request: Request, db: Session = Depends(get_db), note: Annotated[schemas.NoteCreate, Form()] = {}):
+    crud.create_user_note(db, note, 0)
+    notes_db = crud.get_notes(db, skip=0, limit=100)
     return templates.TemplateResponse(
         request=request, name="notes.html", context={"notes": notes_db}
     )
