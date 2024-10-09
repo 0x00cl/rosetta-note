@@ -55,14 +55,15 @@ def read_notes(request: Request):
         request=request, name="notes_create.html", context={}
     )
 
+
 # Should use DELETE method here instead of a POST if we want to follow Restful practices.
 # But because we aren't using JavaScript (at least yet) HTML only allows "GET" and "POST" methods.
 # So a workaround that limitation is having dedicated endpoints where the verbs are in the url and use "POST" to execute them
 @app.post("/notes/{note_id}/delete", response_class=HTMLResponse)
 def delete_note(request: Request, db: Session = Depends(get_db), note_id: int = 0):
     note_deleted = crud.delete_note(db, note_id)
-    print(note_deleted)
-    return RedirectResponse(f"/notes", status_code=303)
+    return RedirectResponse("/notes", status_code=303)
+
 
 @app.get("/notes/{note_id}/delete", response_class=HTMLResponse)
 def delete_note(request: Request, db: Session = Depends(get_db), note_id: int = 0):
@@ -77,6 +78,33 @@ def delete_note(request: Request, db: Session = Depends(get_db), note_id: int = 
     return templates.TemplateResponse(
         request=request, name="note_delete.html", context={"note": note_info}
     )
+
+
+@app.post("/notes/{note_id}/edit", response_class=HTMLResponse)
+def delete_note(
+    request: Request,
+    db: Session = Depends(get_db),
+    note_id: int = 0,
+    note: Annotated[schemas.NoteCreate, Form()] = {},
+):
+    note_deleted = crud.edit_note(db, note_id, note)
+    return RedirectResponse("/notes", status_code=303)
+
+
+@app.get("/notes/{note_id}/edit", response_class=HTMLResponse)
+def delete_note(request: Request, db: Session = Depends(get_db), note_id: int = 0):
+    note_info = crud.get_note(db, note_id)
+    if note_info is None:
+        return templates.TemplateResponse(
+            request=request,
+            status_code=404,
+            name="404_note.html",
+            context={"note_id": note_id},
+        )
+    return templates.TemplateResponse(
+        request=request, name="note_edit.html", context={"note": note_info}
+    )
+
 
 @app.get("/notes/{note_id}", response_class=HTMLResponse)
 def read_notes(request: Request, db: Session = Depends(get_db), note_id: int = 0):
