@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Sign up{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <h1 class="title">Rosetta note - FastAPI (Python)</h1>
+    <h2 class="title is-4">Login</h2>
+    <form action="/login" method="post">
+        <div class="field">
+            <label class="label" for="username">Username</label>
+            <div class="control">
+                <input class="input" type="text" name="username" id="username">
+            </div>
+        </div>
+        
+        <div class="field">
+            <label class="label" for="password">Password</label>
+            <div class="control">
+                <input class="input" type="password" name="password" id="password">
+            </div>
+        </div>
+
+        <div class="field is-grouped">
+            <div class="control">
+            <button type="submit" class="button">Login</button>
+            </div>
+        </div>
+    </form>
+
+  </div>
+</section>
+{% endblock %}
