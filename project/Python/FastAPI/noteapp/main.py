@@ -1,10 +1,10 @@
 from typing import Annotated
 
-from fastapi import FastAPI, Request, Depends, Form
+from fastapi import FastAPI, Request, Depends, Form, Response
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from . import crud, models, schemas
@@ -124,11 +124,6 @@ def read_notes(request: Request, db: Session = Depends(get_db), note_id: int = 0
 
 
 ## USER ##
-# to get a string like this run:
-# openssl rand -hex 32
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -155,10 +150,28 @@ def sign_up_index(request: Request):
 def login_index(request: Request):
     return templates.TemplateResponse(request=request, name="login.html", context={})
 
+@app.get("/users")
+def login_index(request: Request, db: Session = Depends(get_db)):
+    return crud.get_users(db)
+
+
 @app.post("/login")
 def login(
     request: Request,
+    response: Response,
+    user: Annotated[schemas.UserLogin, Form()],
     db: Session = Depends(get_db),
-    user: Annotated[schemas.UserLogin, Form()] = {},
 ):
-    return RedirectResponse("/", status_code=303)
+    login_status = crud.login_user(db, user)
+    if login_status:
+        response.set_cookie(key="user", value=user.username)
+        return templates.TemplateResponse(request=request, name="login_success.html", context={})
+    return RedirectResponse("/login", status_code=303)
+
+
+@app.get("/cookies")
+def login_index(request: Request, response: Response):
+    content = {"message": "Come to the dark side, we have cookies"}
+    response = JSONResponse(content=content)
+    response.set_cookie(key="fakesession", value="fake-cookie-session-value")
+    return response

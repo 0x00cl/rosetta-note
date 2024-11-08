@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- [uv](https://github.com/astral-sh/uv) (recommended)
+- [uv](https://github.com/astral-sh/uv) >= 0.5.0 (recommended)
 
 ## Usage
 

@@ -1,6 +1,13 @@
 from sqlalchemy.orm import Session
+from passlib.hash import pbkdf2_sha256
 
 from . import models, schemas
+
+# to get a string like this run:
+# openssl rand -hex 32
+SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
 def get_user(db: Session, user_id: int):
@@ -16,13 +23,16 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
 
 
 def create_user(db: Session, user: schemas.UserCreate):
-    fake_hashed_password = user.password + "notreallyhashed"
-    db_user = models.User(username=user.username, hashed_password=fake_hashed_password)
+    hashed_password = pbkdf2_sha256.hash(user.password)
+    db_user = models.User(username=user.username, hashed_password=hashed_password)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
     return db_user
 
+def login_user(db: Session, user: schemas.UserLogin):
+    user_info = get_user_by_username(db, user.username)
+    return pbkdf2_sha256.verify(user.password, user_info.hashed_password)
 
 def get_notes(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Note).offset(skip).limit(limit).all()
